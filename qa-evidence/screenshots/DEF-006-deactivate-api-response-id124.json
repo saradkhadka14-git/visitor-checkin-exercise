@@ -1,0 +1,11 @@
+{
+  "id": 124,
+  "full_name": "QA Deactivate Evidence",
+  "company_name": "Demo Company",
+  "purpose": "Deactivation evidence test",
+  "checked_in_at": "2026-09-18T07:54:23Z",
+  "checked_out_at": null,
+  "active": false,
+  "host_id": 1,
+  "host_name": "Alice Mercer"
+}

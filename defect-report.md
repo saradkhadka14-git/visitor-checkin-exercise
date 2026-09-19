@@ -6,7 +6,7 @@ Source reviewed: supplied visitor-checkin-exercise-main source and the user-run 
 
 ### Screenshot evidence convention
 
-Live UI/API screenshots supplied during execution are stored under `qa-evidence/screenshots/` and embedded below the relevant confirmed defects. For controlled harness, race, and performance-risk findings, executable/log/source evidence is retained instead of treating a static screenshot as proof. Two deactivation screenshots (DEF-006/DEF-007) are referenced as pending because those image files are not present in the currently mounted evidence set.
+Live UI/API screenshots supplied during execution are stored under `qa-evidence/screenshots/` and embedded below the relevant confirmed defects. For controlled harness, race, and performance-risk findings, executable/log/source evidence is retained instead of treating a static screenshot as proof. Deactivation evidence for DEF-006 and DEF-007 was captured in a follow-up live retest on 2026-09-18.
 
 ## DEF-001 — Check-in time displays UTC instead of Nepal local time
 
@@ -22,7 +22,7 @@ Live UI/API screenshots supplied during execution are stored under `qa-evidence/
   4. Confirm the active-list Checked In value against an independent Kathmandu conversion.
 - **Expected Result:** The row represents 11:17 in Nepal (minute-only display).
 - **Actual Result:** The row displayed 05:32, the UTC hour/minute, while the browser reported Asia/Katmandu.
-- **Evidence:** QA-VIS-030 [fail], user execution 2026-09-16, visitor-89 API response and UI/console evidence.
+- **Evidence:** User execution 2026-09-16, visitor-89 API response, UI evidence, and browser timezone confirmation.
 
 **Screenshot evidence:**
 
@@ -129,35 +129,54 @@ Direct API check proves Page 2 still contains visitor records:
 - **Summary:** A visitor with active=false is still rendered as active when not checked out.
 - **Type:** Functional / data.
 - **Severity:** High.
-- **Confidence:** Confirmed live.
-- **Description:** The server's active-list query filters checked_out_at: nil but not active: true. Deactivate sets active=false and leaves checked_out_at null, so the record still matches the list query.
+- **Confidence:** Confirmed live and retested.
+- **Description:** The deactivation endpoint successfully changes the visitor record to `active:false`, but after refresh the frontend still renders that visitor in the Active Visitors list with a Check Out action.
 - **Steps to Reproduce:**
-  1. Check the unique visitor QA Deactivate 060 (id 116).
-  2. Send PATCH /api/visitors/116/deactivate.
-  3. Confirm the response has active:false and checked_out_at:null.
-  4. Check the UI after refresh and inspect all active-list pages.
+  1. Check the unique visitor `QA Deactivate Evidence` (id 124).
+  2. Send `PATCH /api/visitors/124/deactivate`.
+  3. Confirm the response contains `active:false` and `checked_out_at:null`.
+  4. Refresh the frontend and inspect the Active Visitors list.
 - **Expected Result:** The deactivated visitor is absent from every active-list page and has no Check Out action there.
-- **Actual Result:** QA Deactivate 060 remained on Page 3 with a Check Out button.
-- **Evidence:** QA-VIS-060 [fail], user PATCH response and 2026-09-17 screenshot/log.
+- **Actual Result:** `QA Deactivate Evidence` remained visible on Page 4 with a Check Out button after the API had returned `active:false`.
+- **Evidence:** QA-VIS-060 [fail]; live retest on 2026-09-18 using visitor id 124.
 
-**Screenshot evidence status:** The defect was confirmed in the user-run session, but the corresponding deactivation screenshot file is not present in the currently mounted evidence set. Keep the execution/API evidence already cited above and add the `QA Deactivate 060` Page-3 screenshot to `qa-evidence/screenshots/` before submission if available.
+**Screenshot / response evidence:**
+
+API deactivation response confirms the visitor is inactive:
+
+![DEF-006 — API deactivation response confirms active false](qa-evidence/screenshots/DEF-006-deactivate-api-response.png)
+
+The exact response is also saved as [`DEF-006-deactivate-api-response-id124.json`](qa-evidence/screenshots/DEF-006-deactivate-api-response-id124.json).
+
+After refresh, the same deactivated visitor is still displayed in the Active Visitors list with a Check Out action:
+
+![DEF-006 — Deactivated visitor remains in active list](qa-evidence/screenshots/DEF-006-deactivated-still-active-list.png)
 
 ## DEF-007 — Deactivated visitors remain selectable for repeat visits
 
 - **Summary:** Name search and autocomplete offer deactivated visitors.
 - **Type:** Functional / data.
 - **Severity:** High.
-- **Confidence:** Confirmed live.
-- **Description:** Search matches name only and does not filter active status. The response gives the form no reliable way to exclude the deactivated row.
+- **Confidence:** Confirmed live and retested.
+- **Description:** Even after the API has deactivated a visitor (`active:false`), the registration Full Name autocomplete still returns that visitor and allows the historical record to populate the form.
 - **Steps to Reproduce:**
-  1. Check that visitor 116 is deactivated.
-  2. Type QA Deactivate 060 in the registration Full Name field.
-  3. Confirm the suggestion and select it.
+  1. Confirm `QA Deactivate Evidence` (id 124) is deactivated with `active:false`.
+  2. Type `QA Deactivate Evidence` in the registration Full Name field.
+  3. Confirm that the deactivated visitor appears in the suggestion list.
+  4. Select the suggestion and inspect the populated Company and Host fields.
 - **Expected Result:** No deactivated visitor appears in search or can be selected for a repeat visit.
-- **Actual Result:** A suggestion appeared and selecting it autofilled company and host.
-- **Evidence:** QA-VIS-061 [fail], user screenshot/log 2026-09-17.
+- **Actual Result:** The deactivated visitor appeared in autocomplete. Selecting it autofilled `Demo Company` and `Alice Mercer`.
+- **Evidence:** QA-VIS-061 [fail]; live retest on 2026-09-18 using visitor id 124.
 
-**Screenshot evidence status:** The defect was confirmed in the user-run session, but the autocomplete screenshot for `QA Deactivate 060` is not present in the currently mounted evidence set. Keep the execution evidence already cited above and add that screenshot to `qa-evidence/screenshots/` before submission if available.
+**Screenshot evidence:**
+
+The deactivated visitor still appears in the autocomplete suggestion:
+
+![DEF-007 — Deactivated visitor is still selectable](qa-evidence/screenshots/DEF-007-deactivated-still-selectable.png)
+
+Selecting the suggestion autofills the previous visitor data:
+
+![DEF-007 — Deactivated visitor selection autofills the form](qa-evidence/screenshots/DEF-007-deactivated-autofill.png)
 
 ## DEF-008 — HTTP registration rejection clears valid input
 
